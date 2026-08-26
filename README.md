@@ -29,6 +29,32 @@ app.post('/api/notes', (req, res) => {
 - What the user experiences because of it
 - The fix
 
+**Answer :**
+
+1. Thiếu await tại dòng const note = Note.create({
+Đây là một thao tác bất đồng bộ. Khi thiếu await res.status(200).json(note); sẽ chạy ngay lập tức khi note đang pending
+Client nhận được một object rỗng hoặc cấu trúc Promise.
+Fixed:
+```javascript
+app.post('/api/notes', async (req, res) => {
+    try {
+        const note = await Note.create({
+```
+2. Thiếu phản hồi lỗi tại
+```javascript
+} catch (error) {
+    console.log(error);
+}
+```
+Khi xảy ra request sẽ bị vì mới log ra console mà không gửi phản hồi HTTP về cho khiến giao diện bị 
+Fixed:
+```javascript
+} catch (error) {
+    console.log(error);
+    res.status(500).({error: 'Create Failed'});
+}
+```
+
 ### Question 1.2 — What's Wrong With This Schema?
 
 ```javascript
